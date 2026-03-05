@@ -1,6 +1,6 @@
 # PVISOR - Reading plot files from thermohydraulic codes
 
-The PVISOR library, developed at [NRG PALLAS](https://www.nrg.eu/),
+The PVISOR library, developed at [NRG PALLAS](https://www.nrgpallas.com/),
 allows you to read in plot files from thermohydraulic codes for further
 data analysis using python.
 Data is represented in a pandas DataFrame.
@@ -20,7 +20,7 @@ PVISOR can be called installed using pip:
 pip install pvisor
 ```
 
-Standard pratice is to import the `read_file` function,
+Import the library and use the `read_file()` function,
 which allows all suported datafiles to be read.
 
 ```python
@@ -37,8 +37,6 @@ print(data["rho-1010000"])
 
 ## Building from source
 
-<!-- Update this part when it is uploaded to git... -->
-
 To install from source, first install requirements.
 For Ubuntu these are
 
@@ -50,7 +48,7 @@ sudo apt install rust python
 Then clone this repository
 
 ```bash
-git clone REPO_URL
+git clone git@github.com:stijnfranssen/pvisor.git
 cd pvisor
 ```
 
