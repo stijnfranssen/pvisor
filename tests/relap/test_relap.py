@@ -26,7 +26,7 @@ def test_read_RELAP():
 
     df = read_file(current_dir / filename, code="RELAP")
 
-    df.to_csv(current_dir / filename.with_suffix(".csv"), index=False)
+    # df.to_csv(current_dir / filename.with_suffix(".csv"), index=False)
 
     df_expected = pd.read_csv(
         current_dir / filename.with_suffix(".csv"),
