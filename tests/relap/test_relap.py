@@ -26,11 +26,12 @@ def test_read_RELAP():
 
     df = read_file(current_dir / filename, code="RELAP")
 
-    # df.to_csv(current_dir / filename.with_suffix(".csv"), index=False)
+    # df.to_csv(current_dir / filename.with_suffix(".csv"))
 
     df_expected = pd.read_csv(
         current_dir / filename.with_suffix(".csv"),
         dtype=np.float32,
+        index_col="time",
     )
 
     pd.testing.assert_frame_equal(df, df_expected)
