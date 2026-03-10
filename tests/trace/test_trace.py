@@ -26,11 +26,12 @@ def test_read_TRACE():
 
     df = read_file(current_dir / filename, code="TRACE")
 
-    # df.to_csv(filename.with_suffix(".csv"), index=False)
+    # df.to_csv(filename.with_suffix(".csv"))
 
     df_expected = pd.read_csv(
         current_dir / filename.with_suffix(".csv"),
         dtype=np.float32,
+        index_col="time",
     )
 
     pd.testing.assert_frame_equal(df, df_expected)

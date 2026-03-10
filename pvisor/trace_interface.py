@@ -110,41 +110,29 @@ def _read_trace(path: Union[str, Path]) -> pd.DataFrame:
 
         # Determine if data is single or double precision and initiliaze the dataframe
         if not npDataFormat:
-            # if timestep == 0:
             nDataPoints_check = unpack(">I", temp[-4:])[0]
             if nDataPoints == (nDataPoints_check - 20) / 4:
-                # DataFormat = 4  # Single precision
                 npDataFormat = np.single
-                # unpackDataFromat = f">{nDataPoints}f"
                 unpackDataFormat = unpacker.unpack_float
             else:
-                # DataFormat = 8  # Double precision
                 npDataFormat = np.double
-                # unpackDataFromat = f">{nDataPoints}d"
                 unpackDataFormat = unpacker.unpack_double
-            # Initialise the time
-            # time_array = np.empty(nPoints, dtype=npDataFormat)
+
+            # Initialise the time and data arrays
+            time_array = np.empty(nPoints, dtype=npDataFormat)
 
             data_array = np.empty((nPoints, n_vars), dtype=npDataFormat)
 
-        # time_array[timestep] = unpackDataFormat()
-        data_array[timestep] = unpacker.unpack_farray(nDataPoints, unpackDataFormat)
-        # list_of_time_steps.append(
-        #     np.array(
-        #         unpacker.unpack_farray(nDataPoints - 1, unpackDataFormat),
-        #         dtype=npDataFormat,
-        #     )
-        # )
+        time_array[timestep] = unpackDataFormat()
+        data_array[timestep] = unpacker.unpack_farray(nDataPoints - 1, unpackDataFormat)
 
-    # breakpoint()
     df = pd.DataFrame(
         data=data_array,
-        # data=list_of_time_steps,
-        # index=time_array,
-        # columns=varNames[1:],  # Skip the time var
-        columns=varNames,  # Skip the time var
+        index=time_array,
+        columns=varNames,
         dtype=npDataFormat,
     )
+    df.index.name = "time"
 
     return df
 
@@ -174,7 +162,7 @@ def _read_var_names(
     varNames : List[str]
         The list of variable names
     """
-    varNames: List[str] = ["time"]  # Full list of variable names
+    varNames: List[str] = []  # Full list of variable names
 
     for n_component in range(nComp):
         temp = unpacker.unpack_fopaque(16)  # Discard the first 16 bytes

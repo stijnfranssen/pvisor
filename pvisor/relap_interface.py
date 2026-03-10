@@ -40,7 +40,7 @@ the actual data (here reprsented as X and Y, these could be characters
 
 After the B line a new set of A&B lines will be present (or End of File).
 
-There are types of B lines. The relevant B lines start with these keywords: 
+There are types of B lines. The relevant B lines start with these keywords:
     1. Plotalf: the names of the variables
     2. Plotnum: the numbers of the variables
     3. Plotrec: the actual data
@@ -73,23 +73,6 @@ import struct  # so it is clear that where struc.error comes from
 ################################################################################
 ### Functions                                                                ###
 ################################################################################
-
-
-def main():
-    # For testing purposes
-    start_small = timer()
-    df_small = read_relap("small.plt")
-    end_small = timer()
-    start_marv = timer()
-    df_marv = read_relap("marviken_divergent.plt")
-    end_marv = timer()
-    start_dsa = timer()
-    df_dsa = read_relap("DSA_lofa.plt")
-    end_dsa = timer()
-    print(f"time for small: {end_small - start_small}")
-    print(f"time for  marv: {end_marv - start_marv}")
-    print(f"time for   DSA: {end_dsa - start_dsa}")
-    return
 
 
 def _read_relap(path: Union[str, Path]) -> pd.DataFrame:
@@ -139,22 +122,24 @@ def _read_relap(path: Union[str, Path]) -> pd.DataFrame:
 
             # Plotrec contains the actual numerical data
             if keyword == b"plotrec ":
-                data[t_step, :] = unpack(unpack_fmt, B_line[8:])[:n_vars]
+                time[t_step] = unpack("<1f", B_line[8:12])[0]
+                data[t_step, :] = unpack(unpack_fmt, B_line[12:])[:n_vars]
                 t_step += 1
                 if t_step % data_expand_size == 0:
+                    time = _expand_np_array(time, data_expand_size, n_vars=1)
                     data = _expand_np_array(data, data_expand_size, n_vars)
                 continue
 
             # Plotalf contains the name of the variables
             elif keyword == b"plotalf ":
-                var_names = [""] * (n_entries - 1)
-                for ij in range(1, n_entries - 1):
-                    var_names[ij - 1] = B_line[ij * 8 : (ij + 1) * 8].decode().strip()
-                if var_names[-1] == "":
+                var_names = [""] * (n_entries)
+                for ij in range(2, n_entries):
+                    var_names[ij - 2] = B_line[ij * 8 : (ij + 1) * 8].decode().strip()
+                while var_names[-1] == "":
                     var_names.pop()
 
                 n_vars = len(var_names)
-                n_bytes = n_vars + 1
+                n_bytes = n_vars
                 if (n_vars) % 2 == 0:
                     n_bytes += 1
 
@@ -162,22 +147,26 @@ def _read_relap(path: Union[str, Path]) -> pd.DataFrame:
 
                 # Prepare data list
                 data_expand_size = 10000
+                time = np.zeros(data_expand_size, dtype="float32")
                 data = np.zeros([data_expand_size, n_vars], dtype="float32")
                 t_step = 0
                 continue
 
             # Plotnum contains the number of the variables
             elif keyword == b"plotnum ":
-                for ij in range(1, n_entries - 1):
+                for ij in range(1, n_entries):
                     # note that only the last 4 bytes contain information
                     word = unpack("i", B_line[ij * 8 : (ij + 1) * 8][4:])[0]
                     #  Skip if the word is 0
                     if word == 0:
                         continue
-                    var_names[ij - 1] += "-" + str(word)
+                    var_names[ij - 2] += "-" + str(word)
+
+                # var_names = var_names[1:]  # Remove the time variable from the list
                 continue
 
-    df = pd.DataFrame(data[:t_step, :], columns=var_names)
+    df = pd.DataFrame(data[:t_step, :], columns=var_names, index=time[:t_step])
+    df.index.name = "time"
 
     return df
 
