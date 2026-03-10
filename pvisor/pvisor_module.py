@@ -73,9 +73,12 @@ def read_file(file_path: Union[str, Path], code: str) -> pd.DataFrame:
         df = read_spectra(file_path)
     elif (code == "SPECTRA_RUST") or (code == "SPECTRA"):
         param_names, _, data_width = _get_params_and_width(file_path)
-        data = rust_read_spectra(file_path=str(file_path), n_digits=data_width)
-        data_dict = {variable: column for variable, column in zip(param_names, data)}
-        df = pd.DataFrame(data_dict)
+        time, data = rust_read_spectra(file_path=str(file_path), n_digits=data_width)
+        data_dict = {
+            variable: column for variable, column in zip(param_names[1:], data)
+        }
+        df = pd.DataFrame(data_dict, index=time)
+        df.index.name = "time"
     elif code == "MELCOR":
         df = _read_melcor(file_path)
     elif code == "TRACE":

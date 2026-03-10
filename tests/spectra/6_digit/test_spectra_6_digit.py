@@ -25,11 +25,16 @@ def test_read_SPECTRA_6_digit():
 
     df = read_file(current_dir / filename, code="SPECTRA")
 
-    # df.to_csv(current_dir / filename.with_suffix(".csv"), index=False)
+    # df.to_csv(current_dir / filename.with_suffix(".csv"))
 
     df_expected = pd.read_csv(
         current_dir / filename.with_suffix(".csv"),
         dtype=np.float64,
+        index_col="time",
     )
 
     pd.testing.assert_frame_equal(df, df_expected)
+
+
+if __name__ == "__main__":
+    test_read_SPECTRA_6_digit()

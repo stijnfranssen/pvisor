@@ -44,7 +44,7 @@ fn pvisor(m: &Bound<'_, PyModule>) -> PyResult<()> {
 ///     the data stored in a vector of columns/vectors.
 ///
 #[pyfunction]
-fn rust_read_spectra(file_path: &str, n_digits: usize) -> Vec<Vec<f32>> {
+fn rust_read_spectra(file_path: &str, n_digits: usize) -> (Vec<f32>, Vec<Vec<f32>>) {
     // Open the file and make an iterator out of the lines
     // let now = Instant::now();
     let plot_file = File::open(file_path).expect("Plot file not found!");
@@ -60,7 +60,8 @@ fn rust_read_spectra(file_path: &str, n_digits: usize) -> Vec<Vec<f32>> {
     let _param_names = _get_param_names(&mut plot_file_lines, n_params);
 
     // Initialize the data structure
-    let mut all_data: Vec<Vec<f32>> = vec![Vec::new(); n_params];
+    let mut all_data: Vec<Vec<f32>> = vec![Vec::new(); n_params-1];
+    let mut time: Vec<f32> = vec![];
 
     // Loop over the data lines until the end of the file is reached.
     loop {
@@ -83,18 +84,27 @@ fn rust_read_spectra(file_path: &str, n_digits: usize) -> Vec<Vec<f32>> {
             let number_str = &data_line[ii % 10 * n_digits..(ii % 10 + 1) * n_digits];
 
             // Convert the str to float and Append/push to the correct column/vector
-            all_data[ii].push(
+            if ii == 0 {
+                time.push(
+                    number_str
+                    .trim()
+                    .parse::<f32>()
+                    .expect("Could not parse line"),
+                )
+            } else {
+            all_data[ii-1].push(
                 number_str
                     .trim()
                     .parse::<f32>()
                     .expect("Could not parse line"),
-            )
+                )
+            }
         }
     }
     // let elapsed = now.elapsed();
     // println!("🦀 Elapsed in rust library 🦀: {:.0?}", elapsed);
 
-    return all_data;
+    return (time, all_data);
 }
 
 /// The first line of SPECTRA plot file contains the total number of variables.
