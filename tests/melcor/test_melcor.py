@@ -28,11 +28,12 @@ def test_read_MELCOR():
     # This column is inconsistent between identical runs, so drop it.
     df.drop(columns=["WARP"], inplace=True)
 
-    # df.to_csv(filename.with_suffix(".csv"), index=False)
+    # df.to_csv(filename.with_suffix(".csv"))
 
     df_expected = pd.read_csv(
         current_dir / filename.with_suffix(".csv"),
         dtype=np.float32,
+        index_col="time",
     )
 
     pd.testing.assert_frame_equal(df, df_expected)
