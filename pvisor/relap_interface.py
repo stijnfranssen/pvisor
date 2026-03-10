@@ -40,7 +40,7 @@ the actual data (here reprsented as X and Y, these could be characters
 
 After the B line a new set of A&B lines will be present (or End of File).
 
-There are types of B lines. The relevant B lines start with these keywords: 
+There are types of B lines. The relevant B lines start with these keywords:
     1. Plotalf: the names of the variables
     2. Plotnum: the numbers of the variables
     3. Plotrec: the actual data
@@ -73,23 +73,6 @@ import struct  # so it is clear that where struc.error comes from
 ################################################################################
 ### Functions                                                                ###
 ################################################################################
-
-
-def main():
-    # For testing purposes
-    start_small = timer()
-    df_small = read_relap("small.plt")
-    end_small = timer()
-    start_marv = timer()
-    df_marv = read_relap("marviken_divergent.plt")
-    end_marv = timer()
-    start_dsa = timer()
-    df_dsa = read_relap("DSA_lofa.plt")
-    end_dsa = timer()
-    print(f"time for small: {end_small - start_small}")
-    print(f"time for  marv: {end_marv - start_marv}")
-    print(f"time for   DSA: {end_dsa - start_dsa}")
-    return
 
 
 def _read_relap(path: Union[str, Path]) -> pd.DataFrame:
