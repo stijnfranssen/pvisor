@@ -29,12 +29,7 @@ jobs:
             target: x86
           - runner: ubuntu-22.04
             target: aarch64
-          - runner: ubuntu-22.04
-            target: armv7
-          - runner: ubuntu-22.04
-            target: s390x
-          - runner: ubuntu-22.04
-            target: ppc64le
+
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -52,31 +47,34 @@ jobs:
         with:
           name: wheels-linux-${{ matrix.platform.target }}
           path: dist
-      # - name: pytest
-      #   if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
-      #   shell: bash
-      #   run: |
-      #     set -e
-      #     python3 -m venv .venv
-      #     source .venv/bin/activate
-      #     pip install pvisor --find-links dist --force-reinstall
-      #     pip install pytest
-      #     pytest
-      # - name: pytest
-      #   if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
-      #   uses: uraimo/run-on-arch-action@v2
-      #   with:
-      #     arch: ${{ matrix.platform.target }}
-      #     distro: ubuntu22.04
-      #     githubToken: ${{ github.token }}
-      #     install: |
-      #       apt-get update
-      #       apt-get install -y --no-install-recommends python3 python3-pip
-      #       pip3 install -U pip pytest
-      #     run: |
-      #       set -e
-      #       pip3 install pvisor --find-links dist --force-reinstall
-      #       pytest
+      - name: pytest
+        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
+        shell: bash
+        run: |
+          set -e
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install pvisor --find-links dist --force-reinstall
+          pip install pytest
+          pytest
+      - name: pytest
+        if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.platform.target }}
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get update
+            apt-get install -y --no-install-recommends python3 python3-pip python3-dev python3-setuptools python3-wheel python3-venv build-essential pkg-config
+            pip3 install -U pip pytest
+          run: |
+            set -e
+            pip3 install --upgrade pip
+            pip3 install pvisor --find-links dist --force-reinstall
+            pytest
+
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
@@ -89,8 +87,6 @@ jobs:
             target: x86
           - runner: ubuntu-22.04
             target: aarch64
-          - runner: ubuntu-22.04
-            target: armv7
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -108,34 +104,38 @@ jobs:
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
           path: dist
-      # - name: pytest
-      #   if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
-      #   run: |
-      #     set -e
-      #     docker run --rm -v ${{ github.workspace }}:/io -w /io alpine:latest sh -c '
-      #       apk add py3-pip py3-virtualenv
-      #       python3 -m virtualenv .venv
-      #       source .venv/bin/activate
-      #       pip install pvisor --no-index --find-links dist --force-reinstall
-      #       pip install pytest
-      #       pytest
-      #     '
-      # - name: pytest
-      #   if: ${{ !startsWith(matrix.platform.target, 'x86') }}
-      #   uses: uraimo/run-on-arch-action@v2
-      #   with:
-      #     arch: ${{ matrix.platform.target }}
-      #     distro: alpine_latest
-      #     githubToken: ${{ github.token }}
-      #     install: |
-      #       apk add py3-virtualenv
-      #     run: |
-      #       set -e
-      #       python3 -m virtualenv .venv
-      #       source .venv/bin/activate
-      #       pip install pytest
-      #       pip install pvisor --find-links dist --force-reinstall
-      #       pytest
+      - name: pytest
+        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
+        run: |
+          set -e
+          docker run --rm -v ${{ github.workspace }}:/io -w /io alpine:latest sh -c '
+            apk add py3-pip py3-virtualenv
+            apk add --no-cache gcc musl-dev python3-dev py3-numpy py3-pip py3-virtualenv
+            python3 -m virtualenv .venv
+            source .venv/bin/activate
+            pip install --upgrade pip
+            pip install pandas numpy pytest sphinx sphinx_rtd_theme maturin py-xdrlib 
+            pip install pvisor --no-index --find-links dist --force-reinstall --no-deps
+            pytest
+          '
+      - name: pytest
+        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.platform.target }}
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          install: |
+            apk add py3-virtualenv
+            apk add --no-cache build-base musl-dev python3-dev py3-numpy py3-pip py3-virtualenv py3-pandas
+          run: |
+            set -e
+            python3 -m virtualenv .venv
+            source .venv/bin/activate
+            pip install --upgrade pip
+            pip install pytest sphinx sphinx_rtd_theme maturin py-xdrlib pandas
+            pip install pvisor --find-links dist --force-reinstall --no-deps
+            pytest
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
@@ -145,9 +145,6 @@ jobs:
           - runner: windows-latest
             target: x64
             python_arch: x64
-          - runner: windows-latest
-            target: x86
-            python_arch: x86
           - runner: windows-11-arm
             target: aarch64
             python_arch: arm64
@@ -168,15 +165,17 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: dist
-      # - name: pytest
-      #   shell: bash
-      #   run: |
-      #     set -e
-      #     python3 -m venv .venv
-      #     source .venv/Scripts/activate
-      #     pip install pvisor --find-links dist --force-reinstall
-      #     pip install pytest
-      #     pytest
+      - name: pytest
+        shell: bash
+        run: |
+          set -e
+          python3 -c "import platform; print(platform.architecture())"
+          python3 -m venv .venv
+          source .venv/Scripts/activate
+          python.exe -m pip install --upgrade pip
+          pip install pvisor --find-links dist --force-reinstall
+          pip install pytest
+          pytest
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
@@ -203,14 +202,14 @@ jobs:
         with:
           name: wheels-macos-${{ matrix.platform.target }}
           path: dist
-      # - name: pytest
-      #   run: |
-      #     set -e
-      #     python3 -m venv .venv
-      #     source .venv/bin/activate
-      #     pip install pvisor --find-links dist --force-reinstall
-      #     pip install pytest
-      #     pytest
+      - name: pytest
+        run: |
+          set -e
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install pvisor --find-links dist --force-reinstall
+          pip install pytest
+          pytest
 
   sdist:
     runs-on: ubuntu-latest
@@ -227,30 +226,30 @@ jobs:
           name: wheels-sdist
           path: dist
 
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
-    needs: [linux, musllinux, windows, macos, sdist]
-    permissions:
-      # Use to sign the release artifacts
-      id-token: write
-      # Used to upload release artifacts
-      contents: write
-      # Used to generate artifact attestation
-      attestations: write
-    environment: 
-      name: pypi
-      url: https://pypi.org/p/pvisor
-    steps:
-      - uses: actions/download-artifact@v7
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-path: 'wheels-*/*'
-      - name: Install uv
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: astral-sh/setup-uv@v7
-      - name: Publish to PyPI
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: uv publish 'wheels-*/*'
+  # release:
+  #   name: Release
+  #   runs-on: ubuntu-latest
+  #   if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
+  #   needs: [linux, musllinux, windows, macos, sdist]
+  #   permissions:
+  #     # Use to sign the release artifacts
+  #     id-token: write
+  #     # Used to upload release artifacts
+  #     contents: write
+  #     # Used to generate artifact attestation
+  #     attestations: write
+  #   environment: 
+  #     name: pypi
+  #     url: https://pypi.org/p/pvisor
+  #   steps:
+  #     - uses: actions/download-artifact@v7
+  #     - name: Generate artifact attestation
+  #       uses: actions/attest-build-provenance@v3
+  #       with:
+  #         subject-path: 'wheels-*/*'
+  #     - name: Install uv
+  #       if: ${{ startsWith(github.ref, 'refs/tags/') }}
+  #       uses: astral-sh/setup-uv@v7
+  #     - name: Publish to PyPI
+  #       if: ${{ startsWith(github.ref, 'refs/tags/') }}
+  #       run: uv publish 'wheels-*/*'
