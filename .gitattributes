@@ -1,0 +1,19 @@
+* text auto
+
+# Enforce text on python and rust files
+*.rs text
+*.py text
+
+# Ignore top level
+.github export-ignore
+
+
+*.csv linguist-vendored
+*.MEL linguist-vendored
+*.PTF linguist-vendored
+*.plt linguist-vendored
+*.PLT linguist-vendored
+MODEL linguist-vendored
+*.i linguist-vendored
+*.inp linguist-vendored
+*.xtv linguist-vendored
