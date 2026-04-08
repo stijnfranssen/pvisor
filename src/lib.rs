@@ -60,7 +60,7 @@ fn rust_read_spectra(file_path: &str, n_digits: usize) -> (Vec<f32>, Vec<Vec<f32
     let _param_names = _get_param_names(&mut plot_file_lines, n_params);
 
     // Initialize the data structure
-    let mut all_data: Vec<Vec<f32>> = vec![Vec::new(); n_params-1];
+    let mut all_data: Vec<Vec<f32>> = vec![Vec::new(); n_params - 1];
     let mut time: Vec<f32> = vec![];
 
     // Loop over the data lines until the end of the file is reached.
@@ -87,16 +87,16 @@ fn rust_read_spectra(file_path: &str, n_digits: usize) -> (Vec<f32>, Vec<Vec<f32
             if ii == 0 {
                 time.push(
                     number_str
-                    .trim()
-                    .parse::<f32>()
-                    .expect("Could not parse line"),
+                        .trim()
+                        .parse::<f32>()
+                        .expect("Could not parse line"),
                 )
             } else {
-            all_data[ii-1].push(
-                number_str
-                    .trim()
-                    .parse::<f32>()
-                    .expect("Could not parse line"),
+                all_data[ii - 1].push(
+                    number_str
+                        .trim()
+                        .parse::<f32>()
+                        .expect("Could not parse line"),
                 )
             }
         }
