@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "pvisor"
 dynamic = ["version"]
-requires-python = ">=3.8,<3.14"
+requires-python = ">=3.8"
 description = "Read System Thermal Hydraulic output"
 readme = "README.md"
 classifiers = [
