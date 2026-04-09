@@ -7,13 +7,15 @@
 # Ignore top level
 .github export-ignore
 
+# Plot output files
+*.csv binary linguist-vendored
+*.PTF binary linguist-vendored
+*.plt binary linguist-vendored
+*.PLT binary linguist-vendored
+*.xtv binary linguist-vendored
 
-*.csv linguist-vendored
+# Model input files
 *.MEL linguist-vendored
-*.PTF linguist-vendored
-*.plt linguist-vendored
-*.PLT linguist-vendored
 MODEL linguist-vendored
 *.i linguist-vendored
 *.inp linguist-vendored
-*.xtv linguist-vendored
