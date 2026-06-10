@@ -10,7 +10,7 @@ from .relap_interface import _read_relap
 from .spectra_interface import read_spectra, _get_params_and_width
 from .pvisor import rust_read_spectra
 from .melcor_interface import _read_melcor
-from .trace_interface import _read_trace
+from .trace_interface import _read_trace, interpolate_trace, get_time_vector_axial, get_axial_profile
 
 ###############################
 ### External modules

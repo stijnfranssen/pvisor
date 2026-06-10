@@ -15,7 +15,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-dependencies = ["pandas", "numpy", "pytest", "sphinx", "sphinx_rtd_theme", "maturin", "py-xdrlib"]
+dependencies = ["pandas", "numpy", "pytest", "sphinx", "sphinx_rtd_theme", "maturin", "py-xdrlib", "xtvreader"]
 [tool.maturin]
 features = ["pyo3/extension-module"]
 authors = [
