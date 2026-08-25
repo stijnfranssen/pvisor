@@ -85,7 +85,7 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
                 time[t_step] = unpack("f", line[:4])[0]
 
                 # Get the actual data in the df
-                data[t_step, 1:] = unpack(unpack_fmt, line[start_byte:end_byte])
+                data[t_step, :] = unpack(unpack_fmt, line[start_byte:end_byte])
 
                 # Increment time step, and expand array if it is full
                 t_step += 1
@@ -164,17 +164,13 @@ def _prepare_data(
     # Some stuff to get the reading of data going
     ###
 
-    # The number of bytes of actual data per data line
-    # Note: reduced by 1 because the time word is read elsewhere.
-    n_words: int = n_vars - 1
-
     # Tells unpack which bytes to read
     word_length: int = 4
     start_byte: int = 4 * word_length  # Actual data start at the 4th word
-    end_byte: int = start_byte + word_length * n_words
+    end_byte: int = start_byte + word_length * n_vars
 
     # The unpack format to convert from bytes to a list of numbers
-    unpack_fmt: str = "<" + n_words * "f"
+    unpack_fmt: str = "<" + n_vars * "f"
     return (
         n_vars,
         data_expand_size,
