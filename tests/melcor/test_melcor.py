@@ -25,9 +25,11 @@ def test_read_MELCOR():
 
     df = read_file(current_dir / filename, code="MELCOR")
 
-    # This column is inconsistent between identical runs, so drop it.
-    df.drop(columns=["WARP"], inplace=True)
+    # These columns are inconsistent between identical runs
+    # when performed on different hardware, so drop them.
+    df.drop(columns=["WARP", "LOCALWARP"], inplace=True)
 
+    # For re-generating target CSV
     # df.to_csv(filename.with_suffix(".csv"))
 
     df_expected = pd.read_csv(
