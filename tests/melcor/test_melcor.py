@@ -27,7 +27,7 @@ def test_read_MELCOR():
 
     # These columns are inconsistent between identical runs
     # when performed on different hardware, so drop them.
-    df.drop(columns=["WARP", "LOCALWARP"], inplace=True)
+    # df.drop(columns=["WARP", "LOCALWARP"], inplace=True)
 
     # For re-generating target CSV
     # df.to_csv(filename.with_suffix(".csv"))
