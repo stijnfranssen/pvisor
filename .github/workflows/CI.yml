@@ -55,7 +55,8 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install dist/pvisor-*.whl --force-reinstall
+          pip install pvisor --no-index --find-links dist --no-deps --force-reinstall
+          pip install $(pip show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
           pytest
       - name: pytest
         if: ${{ matrix.platform.target == 'aarch64' }}
@@ -70,7 +71,8 @@ jobs:
             pip3 install -U pip
           run: |
             set -e
-            pip3 install dist/pvisor-*.whl --force-reinstall
+            pip3 install pvisor --no-index --find-links dist --no-deps --force-reinstall
+            pip3 install $(pip3 show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
             pytest
 
 
@@ -109,11 +111,11 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/io -w /io alpine:latest sh -c '
             apk add py3-pip py3-virtualenv
             apk add --no-cache gcc musl-dev python3-dev py3-numpy py3-pip py3-virtualenv
-            python3 -m virtualenv .venv
+            python3 -m virtualenv --system-site-packages .venv
             source .venv/bin/activate
             pip install --upgrade pip
-            pip install pandas pytest sphinx sphinx_rtd_theme maturin py-xdrlib
-            pip install dist/pvisor-*.whl --no-deps --force-reinstall
+            pip install pvisor --no-index --find-links dist --no-deps --force-reinstall
+            pip install $(pip show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
             pytest
           '
       - name: pytest
@@ -128,11 +130,11 @@ jobs:
             apk add --no-cache build-base musl-dev python3-dev py3-numpy py3-pip py3-virtualenv py3-pandas
           run: |
             set -e
-            python3 -m virtualenv .venv
+            python3 -m virtualenv --system-site-packages .venv
             source .venv/bin/activate
             pip install --upgrade pip
-            pip install pytest sphinx sphinx_rtd_theme maturin py-xdrlib
-            pip install dist/pvisor-*.whl --no-deps --force-reinstall
+            pip install pvisor --no-index --find-links dist --no-deps --force-reinstall
+            pip install $(pip show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
             pytest
 
   windows:
@@ -171,7 +173,8 @@ jobs:
           python3 -m venv .venv
           source .venv/Scripts/activate
           python.exe -m pip install --upgrade pip
-          pip install dist/pvisor-*.whl --force-reinstall
+          pip install pvisor --no-index --find-links dist --no-deps --force-reinstall
+          pip install $(pip show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
           pytest
 
   macos:
@@ -205,7 +208,8 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install dist/pvisor-*.whl --force-reinstall
+          pip install pvisor --no-index --find-links dist --no-deps --force-reinstall
+          pip install $(pip show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
           pytest
 
   sdist:
