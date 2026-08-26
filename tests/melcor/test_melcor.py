@@ -25,11 +25,7 @@ def test_read_MELCOR():
 
     df = read_file(current_dir / filename, code="MELCOR")
 
-    # These columns are inconsistent between identical runs
-    # when performed on different hardware, so drop them.
-    # df.drop(columns=["WARP", "LOCALWARP"], inplace=True)
-
-    # For re-generating expected CSV
+    # For re-generating expected CSV, should be commented in production.
     # df.to_csv(filename.with_suffix(".csv"))
 
     df_expected = pd.read_csv(
@@ -37,9 +33,6 @@ def test_read_MELCOR():
         dtype=np.float32,
         index_col="time",
     )
-
-    print(f"{df=}")
-    print(f"{df_expected=}")
 
     pd.testing.assert_frame_equal(df, df_expected)
 

@@ -81,10 +81,7 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
             if flag == ".TR/":
                 _, line = _get_line(restart_file)
 
-                # Get the time of the data
-                # time[t_step] = unpack("f", line[:4])[0]
-
-                # Get the actual data in the df
+                # Get the data in the df
                 data[t_step,] = unpack(unpack_fmt, line[:end_byte])
 
                 # Increment time step, and expand array if it is full
@@ -106,11 +103,11 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
                     unpack_fmt,
                 ) = _prepare_data(var_names)
 
-            # Skip the next line since it doesn't contain relevant data
-            # Maybe replace with a function that skips (using file.read()) to speed up
+            # If not a relevant line, skip it
             else:
                 _, _ = _get_line(restart_file)
 
+    # Put the data in a df, set the first column as time
     df = pd.DataFrame(
         data[:t_step, 1:],
         columns=var_names[1:],
@@ -152,7 +149,6 @@ def _prepare_data(
     # This value was found by timing the function for a particular file.
     # Maybe do more research to find a better time.
     data_expand_size: int = 100
-    # time: np.ndarray = np.zeros(data_expand_size, dtype="float32")
     data: np.ndarray = np.zeros([data_expand_size, n_vars], dtype="float32")
 
     # The initial time step
@@ -164,7 +160,6 @@ def _prepare_data(
 
     # Tells unpack which bytes to read
     word_length: int = 4
-    # start_byte: int = 4 * word_length  # Actual data start at the 4th word
     end_byte: int = word_length * n_vars
 
     # The unpack format to convert from bytes to a list of numbers
