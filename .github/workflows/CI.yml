@@ -55,8 +55,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install numpy pytest pandas
-          pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
+          pip install dist/pvisor-*.whl --force-reinstall
           pytest
       - name: pytest
         if: ${{ matrix.platform.target == 'aarch64' }}
@@ -68,10 +67,10 @@ jobs:
           install: |
             apt-get update
             apt-get install -y --no-install-recommends python3 python3-pip python3-dev python3-setuptools python3-wheel python3-venv build-essential pkg-config
-            pip3 install -U pip pytest numpy
+            pip3 install -U pip
           run: |
             set -e
-            pip3 install pvisor --no-index --no-deps --find-links dist --force-reinstall
+            pip3 install dist/pvisor-*.whl --force-reinstall
             pytest
 
 
@@ -113,8 +112,8 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install --upgrade pip
-            pip install pandas numpy pytest sphinx sphinx_rtd_theme maturin py-xdrlib
-            pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
+            pip install pandas pytest sphinx sphinx_rtd_theme maturin py-xdrlib
+            pip install dist/pvisor-*.whl --no-deps --force-reinstall
             pytest
           '
       - name: pytest
@@ -132,8 +131,8 @@ jobs:
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install --upgrade pip
-            pip install pytest sphinx sphinx_rtd_theme maturin py-xdrlib pandas
-            pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
+            pip install pytest sphinx sphinx_rtd_theme maturin py-xdrlib
+            pip install dist/pvisor-*.whl --no-deps --force-reinstall
             pytest
 
   windows:
@@ -172,8 +171,7 @@ jobs:
           python3 -m venv .venv
           source .venv/Scripts/activate
           python.exe -m pip install --upgrade pip
-          pip install numpy pytest pandas
-          pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
+          pip install dist/pvisor-*.whl --force-reinstall
           pytest
 
   macos:
@@ -207,8 +205,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install numpy pytest pandas
-          pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
+          pip install dist/pvisor-*.whl --force-reinstall
           pytest
 
   sdist:
