@@ -85,7 +85,7 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
                 time[t_step] = unpack("f", line[:4])[0]
 
                 # Get the actual data in the df
-                data[t_step, :] = unpack(unpack_fmt, line[start_byte:end_byte])
+                data[t_step,] = unpack(unpack_fmt, line[start_byte:end_byte])
 
                 # Increment time step, and expand array if it is full
                 t_step += 1
@@ -113,7 +113,8 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
             else:
                 _, _ = _get_line(restart_file)
 
-    df = pd.DataFrame(data[:t_step, :], columns=var_names, index=time[:t_step])
+    df = pd.DataFrame(data[:t_step], columns=var_names, index=time[:t_step])
+
     df.index.name = "time"
     return df
 
