@@ -115,7 +115,7 @@ jobs:
             source .venv/bin/activate
             pip install --upgrade pip
             pip install pvisor --no-index --find-links dist --no-deps --force-reinstall
-            pip install $(pip show pvisor | awk -F': ' '/^Requires/ {print $2}' | tr ',' ' ')
+            pip install $(pip show pvisor | awk -F": " "/^Requires/ {print \$2}" | tr "," " ")
             pytest
           '
       - name: pytest
