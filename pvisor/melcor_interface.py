@@ -155,8 +155,8 @@ def _prepare_data(
     # This value was found by timing the function for a particular file.
     # Maybe do more research to find a better time.
     data_expand_size: int = 100
-    time: np.ndarray = np.zeros(data_expand_size, dtype="float32")
-    data: np.ndarray = np.zeros([data_expand_size, n_vars], dtype="float32")
+    time: np.ndarray = np.ones(data_expand_size, dtype="float32")
+    data: np.ndarray = np.ones([data_expand_size, n_vars], dtype="float32")
 
     # The initial time step
     t_step: int = 0
@@ -310,10 +310,8 @@ def _expand_np_array(time, data, data_expand_size, n_vars):
     data : np.array
         the modified array.
     """
-    time = np.append(time, np.zeros(data_expand_size, dtype="float32"), axis=0)
-    data = np.append(
-        data, np.zeros([data_expand_size, n_vars], dtype="float32"), axis=0
-    )
+    time = np.append(time, np.ones(data_expand_size, dtype="float32"), axis=0)
+    data = np.append(data, np.ones([data_expand_size, n_vars], dtype="float32"), axis=0)
     return time, data
 
 
