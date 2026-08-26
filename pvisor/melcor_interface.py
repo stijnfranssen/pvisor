@@ -81,16 +81,13 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
             if flag == ".TR/":
                 _, line = _get_line(restart_file)
 
-                # Get the time of the data
-                time[t_step] = unpack("f", line[:4])[0]
-
-                # Get the actual data in the df
-                data[t_step, 1:] = unpack(unpack_fmt, line[start_byte:end_byte])
+                # Get the data in the df
+                data[t_step,] = unpack(unpack_fmt, line[:end_byte])
 
                 # Increment time step, and expand array if it is full
                 t_step += 1
                 if t_step % data_expand_size == 0:
-                    time, data = _expand_np_array(time, data, data_expand_size, n_vars)
+                    data = _expand_np_array(data, data_expand_size, n_vars)
 
             ### Variable name block, get the variable names and prepare for reading data.
             elif flag == "KEY ":
@@ -100,27 +97,29 @@ def _read_melcor(path: Union[str, Path]) -> pd.DataFrame:
                 (
                     n_vars,
                     data_expand_size,
-                    time,
                     data,
                     t_step,
-                    start_byte,
                     end_byte,
                     unpack_fmt,
                 ) = _prepare_data(var_names)
 
-            # Skip the next line since it doesn't contain relevant data
-            # Maybe replace with a function that skips (using file.read()) to speed up
+            # If not a relevant line, skip it
             else:
                 _, _ = _get_line(restart_file)
 
-    df = pd.DataFrame(data[:t_step, :], columns=var_names, index=time[:t_step])
+    # Put the data in a df, set the first column as time
+    df = pd.DataFrame(
+        data[:t_step, 1:],
+        columns=var_names[1:],
+        index=data[:t_step, 0],
+    )
     df.index.name = "time"
     return df
 
 
 def _prepare_data(
     var_names: List[str],
-) -> Tuple[int, int, np.ndarray, np.ndarray, int, int, int, str]:
+) -> Tuple[int, int, np.ndarray, int, int, str]:
     """
     After reading the variable names, prepare the reading of the data.
 
@@ -135,14 +134,10 @@ def _prepare_data(
         The number of vars (i.e. len(var_names))
     data_expand_size : int
         Increase the dataframe by this amount to speed up
-    time : np.ndarray
-        The inizialisation of the time index
     data : np.ndarray
         The inizialisation of the data
     t_step : int
         The current time step (0)
-    start_byte : int
-        The byte at which to start reading the .TR/ data lines
     end_byte : int
         The byte at which to end reading the .TR/ data lines
     unpack_fmt : str
@@ -154,7 +149,6 @@ def _prepare_data(
     # This value was found by timing the function for a particular file.
     # Maybe do more research to find a better time.
     data_expand_size: int = 100
-    time: np.ndarray = np.zeros(data_expand_size, dtype="float32")
     data: np.ndarray = np.zeros([data_expand_size, n_vars], dtype="float32")
 
     # The initial time step
@@ -164,24 +158,17 @@ def _prepare_data(
     # Some stuff to get the reading of data going
     ###
 
-    # The number of bytes of actual data per data line
-    # Note: reduced by 1 because the time word is read elsewhere.
-    n_words: int = n_vars - 1
-
     # Tells unpack which bytes to read
     word_length: int = 4
-    start_byte: int = 4 * word_length  # Actual data start at the 4th word
-    end_byte: int = start_byte + word_length * n_words
+    end_byte: int = word_length * n_vars
 
     # The unpack format to convert from bytes to a list of numbers
-    unpack_fmt: str = "<" + n_words * "f"
+    unpack_fmt: str = "<" + n_vars * "f"
     return (
         n_vars,
         data_expand_size,
-        time,
         data,
         t_step,
-        start_byte,
         end_byte,
         unpack_fmt,
     )
@@ -201,7 +188,8 @@ def _get_var_names(restart_file: BinaryIO) -> List[str]:
         3. The numeric part of the variable names is attached to the keywords
             Note some variables do not have a numerical part, they do not get
             number appended.
-    At the end the variable time is inserted at the start of the list.
+    At the end of the routine the variables time, dt, cpu and ncycle
+    are inserted at the start of the list.
 
     Parameters
     ----------
@@ -287,18 +275,16 @@ def _get_var_names(restart_file: BinaryIO) -> List[str]:
         if var_number != 0:
             var_names[ii] = f"{var_names[ii]}.{var_number}"
 
-    # # Add the variable for time as the first variable
-    # var_names.insert(0, "time")
+    # Add the variable for time, dt, cpu and ncycle as the first variable
+    var_names[0:0] = ["time", "dt", "cpu", "ncycle"]
     return var_names
 
 
-def _expand_np_array(time, data, data_expand_size, n_vars):
+def _expand_np_array(data, data_expand_size, n_vars):
     """Expands an existing array
 
     Parameters
     ----------
-    time: np.array
-        The time array
     data : np.array
         The existing array
     data_expand_size : int
@@ -308,16 +294,14 @@ def _expand_np_array(time, data, data_expand_size, n_vars):
 
     Returns
     -------
-    time : np.array
-        The time array
     data : np.array
         the modified array.
     """
-    time = np.append(time, np.zeros(data_expand_size, dtype="float32"), axis=0)
+    # time = np.append(time, np.zeros(data_expand_size, dtype="float32"), axis=0)
     data = np.append(
         data, np.zeros([data_expand_size, n_vars], dtype="float32"), axis=0
     )
-    return time, data
+    return data
 
 
 def _check_string(restart_file: BinaryIO, path: Path, string: str) -> str:
