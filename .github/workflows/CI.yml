@@ -55,7 +55,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install numpy pytest
+          pip install numpy pytest pandas
           pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
           pytest
       - name: pytest
@@ -172,7 +172,7 @@ jobs:
           python3 -m venv .venv
           source .venv/Scripts/activate
           python.exe -m pip install --upgrade pip
-          pip install numpy pytest
+          pip install numpy pytest pandas
           pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
           pytest
 
@@ -207,7 +207,7 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install numpy pytest
+          pip install numpy pytest pandas
           pip install pvisor --no-index --no-deps --find-links dist --force-reinstall
           pytest
 
